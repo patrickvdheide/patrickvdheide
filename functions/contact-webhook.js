@@ -55,16 +55,20 @@ export async function onRequestPost(context) {
    *    Webflow webhook wikkelt data soms in
    *    payload.data of payload.submissionData
    * ───────────────────────────────────────── */
-  const fields = payload?.data?.submissionData
-    ?? payload?.data
-    ?? payload?.submissionData
-    ?? payload;
+  // Webflow wikkelt de echte data in een buitenste "payload" sleutel
+  const root = payload?.payload ?? payload;
 
-  // Webflow stuurt de formuliernaam mee als formName of data.name
+  const fields = root?.data?.submissionData
+    ?? root?.data
+    ?? root?.submissionData
+    ?? root;
+
+  // Formuliernaam zit in root.name (bijv. "wf-form-Offerte-Formulier")
   const formName = (
-    payload?.formName
-    ?? payload?.data?.name
-    ?? payload?.name
+    root?.name
+    ?? root?.formName
+    ?? root?.data?.name
+    ?? payload?.formName
     ?? ""
   ).toLowerCase();
 
