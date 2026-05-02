@@ -159,13 +159,13 @@ const BASE_STYLES = `
   body {
     margin: 0 !important;
     padding: 0 !important;
-    background-color: #fffff5;
+    background-color: #f2f2f2;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
     color: #111111;
     -webkit-font-smoothing: antialiased;
   }
 
-  .wrapper { width: 100%; background-color: #fffff5; padding: 40px 16px; }
+  .wrapper { width: 100%; background-color: #f2f2f2; padding: 40px 16px; }
   .card { max-width: 560px; margin: 0 auto; background-color: #ffffff; }
 
   /* Header */
