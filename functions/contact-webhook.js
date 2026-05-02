@@ -20,7 +20,6 @@ export async function onRequestPost(context) {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
 
-  /* ── Payload parsen ─────────────────────────────────────────── */
   let payload = {};
   try {
     const contentType = request.headers.get("content-type") || "";
@@ -40,18 +39,15 @@ export async function onRequestPost(context) {
     );
   }
 
-  /* ── Webflow payload uitpakken ──────────────────────────────── */
   const root   = payload?.payload ?? payload;
   const fields = root?.data?.submissionData ?? root?.data ?? root?.submissionData ?? root;
   const formName = (root?.name ?? root?.formName ?? root?.data?.name ?? payload?.formName ?? "").toLowerCase();
 
-  /* ── Formulier detectie ─────────────────────────────────────── */
   const isOfferte =
     formName.includes("offerte") ||
     fields["Pakket"] !== undefined ||
     fields["Budget indicatie"] !== undefined;
 
-  /* ── Velden uitlezen ────────────────────────────────────────── */
   let email, naam, telefoon, bedrijf, bericht, pakket, budget;
 
   if (!isOfferte) {
@@ -82,7 +78,6 @@ export async function onRequestPost(context) {
   });
   const voornaam = naam.split(" ")[0];
 
-  /* ── Templates kiezen ───────────────────────────────────────── */
   const emailHtml = isOfferte
     ? buildOfferteEmail({ naam, voornaam, telefoon, bedrijf, bericht, pakket, budget, inkomstDatum })
     : buildContactEmail({ naam, voornaam, telefoon, bedrijf, bericht, inkomstDatum });
@@ -99,7 +94,6 @@ export async function onRequestPost(context) {
     ? `Nieuwe offerte-aanvraag — ${naam} | ${pakket}`
     : `Nieuw contactverzoek — ${naam} | ${bedrijf}`;
 
-  /* ── Verstuur via Resend ────────────────────────────────────── */
   const apiKey = env.RESEND_API_KEY;
   if (!apiKey) {
     return new Response(
@@ -149,29 +143,19 @@ export async function onRequestPost(context) {
 /* ═══════════════════════════════════════════════════════════════
  * CONSTANTEN
  * ═══════════════════════════════════════════════════════════════ */
-const PHOTO_URL = "https://cdn.prod.website-files.com/69e0d7dd8d567c254b883a87/69edd68503e45afbba78fec6_Patrickvdheide-Webclip.avif";
+const PHOTO_URL  = "https://cdn.prod.website-files.com/69e0d7dd8d567c254b883a87/69edd68503e45afbba78fec6_Patrickvdheide-Webclip.avif";
 const AGENDA_URL = "https://meetings-eu1.hubspot.com/patrick-van-der-heide?uuid=0e32d639-d879-48e4-bd2d-d032fb386119";
 
 /* ═══════════════════════════════════════════════════════════════
  * GEDEELDE CSS
- * Brand: patrickvdheide.nl
- *   Achtergrond  : #fffff5
- *   Donker blok  : #111111
- *   Roze accent  : #fab3db
- *   Tekst        : #111111
- *   Subtekst     : #878787
- *   Stroke       : #cecece
- *   Field BG     : #fafafa
- *   Heading      : Impact (Tanker-equivalent voor email)
- *   Body         : Inter / system-ui
  * ═══════════════════════════════════════════════════════════════ */
 const BASE_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
   *, *::before, *::after { box-sizing: border-box; }
   body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
-  table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; }
   img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
   a { text-decoration: none; color: inherit; }
+
   body {
     margin: 0 !important;
     padding: 0 !important;
@@ -180,74 +164,61 @@ const BASE_STYLES = `
     color: #111111;
     -webkit-font-smoothing: antialiased;
   }
-  .email-wrapper { width: 100%; background-color: #fffff5; padding: 40px 16px; }
-  .email-card { max-width: 580px; margin: 0 auto; background-color: #ffffff; border: 1px solid #cecece; overflow: hidden; }
 
-  /* ── Header ── */
-  .email-header { background-color: #111111; padding: 22px 32px; }
-  .header-inner { display: flex; align-items: center; gap: 12px; }
-  .header-photo { width: 36px; height: 36px; border-radius: 50%; border: 2px solid #fab3db; display: block; object-fit: cover; }
-  .header-name {
-    font-family: Impact, 'Arial Black', 'Arial Bold', Arial, sans-serif;
-    font-size: 13px;
+  .wrapper { width: 100%; background-color: #fffff5; padding: 40px 16px; }
+  .card { max-width: 560px; margin: 0 auto; background-color: #ffffff; }
+
+  /* Header */
+  .hdr { background-color: #111111; padding: 20px 36px; }
+  .hdr-inner { display: flex; align-items: center; gap: 10px; }
+  .hdr-photo { width: 32px; height: 32px; border-radius: 50%; display: block; object-fit: cover; }
+  .hdr-name {
+    font-family: Impact, 'Arial Black', Arial, sans-serif;
+    font-size: 12px;
     font-weight: 900;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: #ffffff;
     margin: 0;
   }
 
-  /* ── Hero ── */
-  .email-hero { background-color: #111111; padding: 32px 32px 44px; border-bottom: 4px solid #fab3db; }
+  /* Hero */
+  .hero { background-color: #111111; padding: 28px 36px 44px; border-bottom: 4px solid #fab3db; }
   .hero-eyebrow {
     font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.16em;
+    font-weight: 600;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: #878787;
-    margin: 0 0 18px;
+    margin: 0 0 16px;
   }
   .hero-title {
-    font-family: Impact, 'Arial Black', 'Arial Bold', Arial, sans-serif;
-    font-size: 44px;
+    font-family: Impact, 'Arial Black', Arial, sans-serif;
+    font-size: 46px;
     font-weight: 900;
     letter-spacing: 0.02em;
     text-transform: uppercase;
     color: #ffffff;
-    line-height: 1.05;
-    margin: 0 0 22px;
+    line-height: 1.0;
+    margin: 0 0 20px;
   }
   .hero-title .pink { color: #fab3db; }
-  .hero-body { font-size: 15px; line-height: 1.75; color: #878787; margin: 0; max-width: 440px; }
+  .hero-body { font-size: 14px; line-height: 1.8; color: #878787; margin: 0; }
   .hero-body strong { color: #ffffff; font-weight: 600; }
 
-  /* ── Samenvatting ── */
-  .content-section { padding: 32px 32px; border-bottom: 1px solid #cecece; }
-  .section-label {
+  /* Content — plat, geen kaders */
+  .content { padding: 36px 36px 0; }
+  .field-block { margin-bottom: 20px; }
+  .field-label {
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: #878787;
-    margin: 0 0 14px;
+    margin: 0 0 4px;
+    display: block;
   }
-  .summary-wrap { border: 1px solid #cecece; overflow: hidden; }
-  .s-row { display: flex; border-bottom: 1px solid #cecece; align-items: flex-start; }
-  .s-row:last-child { border-bottom: none; }
-  .s-key {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #878787;
-    background-color: #fafafa;
-    padding: 13px 14px;
-    width: 120px;
-    flex-shrink: 0;
-    border-right: 1px solid #cecece;
-    line-height: 1.4;
-  }
-  .s-val { font-size: 14px; color: #111111; padding: 13px 16px; flex: 1; line-height: 1.6; word-break: break-word; }
+  .field-value { font-size: 15px; color: #111111; margin: 0; line-height: 1.6; }
   .pill {
     display: inline-block;
     background-color: #111111;
@@ -256,86 +227,78 @@ const BASE_STYLES = `
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    padding: 4px 12px;
+    padding: 4px 14px;
     border-radius: 100px;
   }
 
-  /* ── Stappenplan ── */
-  .steps-section { padding: 32px 32px; background-color: #111111; border-bottom: 4px solid #fab3db; }
-  .step-row-item { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 22px; }
-  .step-row-item:last-child { margin-bottom: 0; }
+  /* Divider */
+  .divider { height: 1px; background-color: #ececec; margin: 32px 36px 0; }
+
+  /* Stappenplan */
+  .steps { background-color: #111111; padding: 36px 36px; margin-top: 32px; border-bottom: 4px solid #fab3db; }
+  .step { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 24px; }
+  .step:last-child { margin-bottom: 0; }
   .step-num {
-    font-family: Impact, 'Arial Black', 'Arial Bold', Arial, sans-serif;
-    font-size: 28px;
+    font-family: Impact, 'Arial Black', Arial, sans-serif;
+    font-size: 30px;
     font-weight: 900;
     color: #fab3db;
     line-height: 1;
-    width: 32px;
+    width: 34px;
     flex-shrink: 0;
-    padding-top: 1px;
   }
-  .step-content { flex: 1; }
-  .step-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #ffffff;
-    letter-spacing: 0.02em;
-    margin: 0 0 4px;
-  }
+  .step-body { flex: 1; padding-top: 3px; }
+  .step-title { font-size: 13px; font-weight: 700; color: #ffffff; margin: 0 0 3px; }
   .step-desc { font-size: 13px; color: #878787; line-height: 1.65; margin: 0; }
 
-  /* ── CTA ── */
-  .cta-section { padding: 32px 32px; border-bottom: 1px solid #cecece; }
-  .cta-text { font-size: 15px; color: #111111; line-height: 1.7; margin: 0 0 22px; }
+  /* CTA */
+  .cta { padding: 36px 36px; }
+  .cta-text { font-size: 15px; color: #111111; line-height: 1.7; margin: 0 0 20px; }
   .cta-btn {
     display: inline-block;
     background-color: #111111;
     color: #ffffff !important;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    padding: 15px 30px;
+    padding: 14px 28px;
     border-radius: 100px;
     text-decoration: none;
   }
 
-  /* ── Footer ── */
-  .email-footer { background-color: #111111; padding: 28px 32px; }
-  .footer-photo { width: 44px; height: 44px; border-radius: 50%; border: 2px solid #fab3db; display: block; object-fit: cover; margin-bottom: 14px; }
-  .footer-name {
-    font-family: Impact, 'Arial Black', 'Arial Bold', Arial, sans-serif;
-    font-size: 14px;
+  /* Footer */
+  .ftr { background-color: #111111; padding: 28px 36px; border-top: 1px solid #1e1e1e; }
+  .ftr-photo { width: 40px; height: 40px; border-radius: 50%; display: block; object-fit: cover; margin-bottom: 12px; }
+  .ftr-name {
+    font-family: Impact, 'Arial Black', Arial, sans-serif;
+    font-size: 13px;
     font-weight: 900;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: #ffffff;
-    margin: 0 0 4px;
+    margin: 0 0 3px;
   }
-  .footer-role { font-size: 12px; color: #878787; margin: 0 0 14px; }
-  .footer-links { font-size: 12px; color: #878787; line-height: 2; margin: 0; }
-  .footer-links a { color: #ffffff; }
+  .ftr-role { font-size: 12px; color: #878787; margin: 0 0 14px; line-height: 1.5; }
+  .ftr-links { font-size: 12px; color: #878787; line-height: 2.0; margin: 0; }
+  .ftr-links a { color: #ffffff; }
 
-  /* ── Responsive ── */
   @media only screen and (max-width: 600px) {
-    .email-wrapper   { padding: 0 !important; }
-    .email-card      { border-left: none !important; border-right: none !important; }
-    .email-header    { padding: 18px 20px !important; }
-    .email-hero      { padding: 28px 20px 36px !important; }
-    .hero-title      { font-size: 32px !important; }
-    .content-section { padding: 24px 20px !important; }
-    .steps-section   { padding: 28px 20px !important; }
-    .cta-section     { padding: 28px 20px !important; }
-    .email-footer    { padding: 28px 20px !important; }
-    .s-row           { flex-direction: column; }
-    .s-key           { width: 100% !important; border-right: none !important; border-bottom: 1px solid #cecece; }
-    .cta-btn         { display: block !important; text-align: center !important; }
+    .wrapper { padding: 0 !important; }
+    .hdr     { padding: 18px 22px !important; }
+    .hero    { padding: 24px 22px 36px !important; }
+    .hero-title { font-size: 34px !important; }
+    .content { padding: 28px 22px 0 !important; }
+    .divider { margin: 24px 22px 0 !important; }
+    .steps   { padding: 28px 22px !important; margin-top: 24px !important; }
+    .cta     { padding: 28px 22px !important; }
+    .ftr     { padding: 28px 22px !important; }
+    .cta-btn { display: block !important; text-align: center !important; }
   }
 `;
 
 /* ═══════════════════════════════════════════════════════════════
- * TEMPLATE 1 — BEDANKMAIL CONTACTFORMULIER
+ * TEMPLATE 1 — CONTACTFORMULIER
  * ═══════════════════════════════════════════════════════════════ */
 function buildContactEmail({ naam, voornaam, telefoon, bedrijf, bericht, inkomstDatum }) {
   return `<!DOCTYPE html>
@@ -352,66 +315,57 @@ function buildContactEmail({ naam, voornaam, telefoon, bedrijf, bericht, inkomst
     ${voornaam}, jouw bericht is ontvangen. Ik neem binnen 1 tot 2 werkdagen contact op. &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847;
   </div>
 
-  <div class="email-wrapper">
-    <div class="email-card">
+  <div class="wrapper">
+    <div class="card">
 
-      <!-- Header -->
-      <div class="email-header">
-        <div class="header-inner">
-          <img src="${PHOTO_URL}" alt="Patrick vd Heide" class="header-photo" width="36" height="36"/>
-          <p class="header-name">Patrick vd Heide</p>
+      <div class="hdr">
+        <div class="hdr-inner">
+          <img src="${PHOTO_URL}" alt="Patrick vd Heide" class="hdr-photo" width="32" height="32"/>
+          <p class="hdr-name">Patrick vd Heide</p>
         </div>
       </div>
 
-      <!-- Hero -->
-      <div class="email-hero">
+      <div class="hero">
         <p class="hero-eyebrow">Bevestiging &mdash; ${inkomstDatum}</p>
         <h1 class="hero-title">Bericht<br/>ontvangen,<br/><span class="pink">${voornaam}.</span></h1>
         <p class="hero-body">
-          Goed dat je contact opneemt. Ik neem jouw bericht door
-          en kom er <strong>binnen 1 tot 2 werkdagen</strong> op terug.
+          Goed dat je contact opneemt. Ik neem jouw bericht door en
+          kom er <strong>binnen 1 tot 2 werkdagen</strong> op terug.
           Liever direct schakelen? Je weet me te vinden.
         </p>
       </div>
 
-      <!-- Samenvatting -->
-      <div class="content-section">
-        <p class="section-label">Jouw inzending</p>
-        <div class="summary-wrap">
-          <div class="s-row">
-            <span class="s-key">Naam</span>
-            <span class="s-val">${escapeHtml(naam)}</span>
-          </div>
-          <div class="s-row">
-            <span class="s-key">Telefoon</span>
-            <span class="s-val">${escapeHtml(telefoon)}</span>
-          </div>
-          <div class="s-row">
-            <span class="s-key">Bedrijf</span>
-            <span class="s-val">${escapeHtml(bedrijf)}</span>
-          </div>
-          <div class="s-row">
-            <span class="s-key">Bericht</span>
-            <span class="s-val">${escapeHtml(bericht)}</span>
-          </div>
+      <div class="content">
+        <div class="field-block">
+          <span class="field-label">Naam</span>
+          <p class="field-value">${escapeHtml(naam)}</p>
+        </div>
+        <div class="field-block">
+          <span class="field-label">Telefoon</span>
+          <p class="field-value">${escapeHtml(telefoon)}</p>
+        </div>
+        <div class="field-block">
+          <span class="field-label">Bedrijf</span>
+          <p class="field-value">${escapeHtml(bedrijf)}</p>
+        </div>
+        <div class="field-block">
+          <span class="field-label">Bericht</span>
+          <p class="field-value">${escapeHtml(bericht)}</p>
         </div>
       </div>
 
-      <!-- CTA -->
-      <div class="cta-section">
-        <p class="cta-text">
-          Wil je alvast een gesprek inplannen?<br/>
-          Dat kan direct via de agenda.
-        </p>
+      <div class="divider"></div>
+
+      <div class="cta">
+        <p class="cta-text">Wil je alvast een gesprek inplannen?<br/>Dat kan direct via de agenda.</p>
         <a href="${AGENDA_URL}" class="cta-btn">Plan een gesprek</a>
       </div>
 
-      <!-- Footer -->
-      <div class="email-footer">
-        <img src="${PHOTO_URL}" alt="Patrick vd Heide" class="footer-photo" width="44" height="44"/>
-        <p class="footer-name">Patrick vd Heide</p>
-        <p class="footer-role">Freelance Webflow Designer &amp; White-Label Partner</p>
-        <p class="footer-links">
+      <div class="ftr">
+        <img src="${PHOTO_URL}" alt="Patrick vd Heide" class="ftr-photo" width="40" height="40"/>
+        <p class="ftr-name">Patrick vd Heide</p>
+        <p class="ftr-role">Freelance Webflow Designer &amp; White-Label Partner</p>
+        <p class="ftr-links">
           <a href="mailto:hallo@patrickvdheide.nl">hallo@patrickvdheide.nl</a><br/>
           <a href="tel:0623220598">06 23 22 05 98</a><br/>
           <a href="https://patrickvdheide.nl">patrickvdheide.nl</a>
@@ -425,7 +379,7 @@ function buildContactEmail({ naam, voornaam, telefoon, bedrijf, bericht, inkomst
 }
 
 /* ═══════════════════════════════════════════════════════════════
- * TEMPLATE 2 — BEDANKMAIL OFFERTEFORMULIER
+ * TEMPLATE 2 — OFFERTEFORMULIER
  * ═══════════════════════════════════════════════════════════════ */
 function buildOfferteEmail({ naam, voornaam, telefoon, bedrijf, bericht, pakket, budget, inkomstDatum }) {
   return `<!DOCTYPE html>
@@ -442,19 +396,17 @@ function buildOfferteEmail({ naam, voornaam, telefoon, bedrijf, bericht, pakket,
     ${voornaam}, jouw offerte-aanvraag is ontvangen. Ik neem binnen één werkdag contact op. &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847;
   </div>
 
-  <div class="email-wrapper">
-    <div class="email-card">
+  <div class="wrapper">
+    <div class="card">
 
-      <!-- Header -->
-      <div class="email-header">
-        <div class="header-inner">
-          <img src="${PHOTO_URL}" alt="Patrick vd Heide" class="header-photo" width="36" height="36"/>
-          <p class="header-name">Patrick vd Heide</p>
+      <div class="hdr">
+        <div class="hdr-inner">
+          <img src="${PHOTO_URL}" alt="Patrick vd Heide" class="hdr-photo" width="32" height="32"/>
+          <p class="hdr-name">Patrick vd Heide</p>
         </div>
       </div>
 
-      <!-- Hero -->
-      <div class="email-hero">
+      <div class="hero">
         <p class="hero-eyebrow">Offerte-aanvraag &mdash; ${inkomstDatum}</p>
         <h1 class="hero-title">Aanvraag<br/>ontvangen,<br/><span class="pink">${voornaam}.</span></h1>
         <p class="hero-body">
@@ -464,78 +416,68 @@ function buildOfferteEmail({ naam, voornaam, telefoon, bedrijf, bericht, pakket,
         </p>
       </div>
 
-      <!-- Samenvatting -->
-      <div class="content-section">
-        <p class="section-label">Jouw aanvraag</p>
-        <div class="summary-wrap">
-          <div class="s-row">
-            <span class="s-key">Naam</span>
-            <span class="s-val">${escapeHtml(naam)}</span>
-          </div>
-          <div class="s-row">
-            <span class="s-key">Telefoon</span>
-            <span class="s-val">${escapeHtml(telefoon)}</span>
-          </div>
-          <div class="s-row">
-            <span class="s-key">Bedrijf</span>
-            <span class="s-val">${escapeHtml(bedrijf)}</span>
-          </div>
-          <div class="s-row">
-            <span class="s-key">Pakket</span>
-            <span class="s-val"><span class="pill">${escapeHtml(pakket)}</span></span>
-          </div>
-          <div class="s-row">
-            <span class="s-key">Budget</span>
-            <span class="s-val"><span class="pill">${escapeHtml(budget)}</span></span>
-          </div>
-          <div class="s-row">
-            <span class="s-key">Uitdaging</span>
-            <span class="s-val">${escapeHtml(bericht)}</span>
-          </div>
+      <div class="content">
+        <div class="field-block">
+          <span class="field-label">Naam</span>
+          <p class="field-value">${escapeHtml(naam)}</p>
+        </div>
+        <div class="field-block">
+          <span class="field-label">Telefoon</span>
+          <p class="field-value">${escapeHtml(telefoon)}</p>
+        </div>
+        <div class="field-block">
+          <span class="field-label">Bedrijf</span>
+          <p class="field-value">${escapeHtml(bedrijf)}</p>
+        </div>
+        <div class="field-block">
+          <span class="field-label">Pakket</span>
+          <p class="field-value"><span class="pill">${escapeHtml(pakket)}</span></p>
+        </div>
+        <div class="field-block">
+          <span class="field-label">Budget</span>
+          <p class="field-value"><span class="pill">${escapeHtml(budget)}</span></p>
+        </div>
+        <div class="field-block">
+          <span class="field-label">Uitdaging</span>
+          <p class="field-value">${escapeHtml(bericht)}</p>
         </div>
       </div>
 
-      <!-- Stappenplan -->
-      <div class="steps-section">
-        <p class="section-label" style="color:#878787;margin-bottom:24px;">Wat kun je verwachten?</p>
-        <div class="step-row-item">
+      <div class="steps">
+        <p style="font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#878787;margin:0 0 24px;">Wat kun je verwachten?</p>
+        <div class="step">
           <span class="step-num">01</span>
-          <div class="step-content">
+          <div class="step-body">
             <p class="step-title">Ik neem contact op</p>
             <p class="step-desc">Ik neem jouw aanvraag door en kom er binnen één werkdag op terug.</p>
           </div>
         </div>
-        <div class="step-row-item">
+        <div class="step">
           <span class="step-num">02</span>
-          <div class="step-content">
+          <div class="step-body">
             <p class="step-title">Kennismakingsgesprek</p>
             <p class="step-desc">We plannen een kort gesprek om de scope en verwachtingen scherp te krijgen.</p>
           </div>
         </div>
-        <div class="step-row-item">
+        <div class="step">
           <span class="step-num">03</span>
-          <div class="step-content">
+          <div class="step-body">
             <p class="step-title">Offerte op maat</p>
             <p class="step-desc">Je ontvangt een heldere offerte. Geen verrassingen achteraf.</p>
           </div>
         </div>
       </div>
 
-      <!-- CTA -->
-      <div class="cta-section">
-        <p class="cta-text">
-          Wil je alvast een gesprek inplannen?<br/>
-          Dat kan direct via de agenda.
-        </p>
+      <div class="cta">
+        <p class="cta-text">Wil je alvast een gesprek inplannen?<br/>Dat kan direct via de agenda.</p>
         <a href="${AGENDA_URL}" class="cta-btn">Plan een kennismaking</a>
       </div>
 
-      <!-- Footer -->
-      <div class="email-footer">
-        <img src="${PHOTO_URL}" alt="Patrick vd Heide" class="footer-photo" width="44" height="44"/>
-        <p class="footer-name">Patrick vd Heide</p>
-        <p class="footer-role">Freelance Webflow Designer &amp; White-Label Partner</p>
-        <p class="footer-links">
+      <div class="ftr">
+        <img src="${PHOTO_URL}" alt="Patrick vd Heide" class="ftr-photo" width="40" height="40"/>
+        <p class="ftr-name">Patrick vd Heide</p>
+        <p class="ftr-role">Freelance Webflow Designer &amp; White-Label Partner</p>
+        <p class="ftr-links">
           <a href="mailto:hallo@patrickvdheide.nl">hallo@patrickvdheide.nl</a><br/>
           <a href="tel:0623220598">06 23 22 05 98</a><br/>
           <a href="https://patrickvdheide.nl">patrickvdheide.nl</a>
@@ -558,7 +500,7 @@ function buildInternalContact({ naam, email, telefoon, bedrijf, bericht, inkomst
     meta: `${inkomstDatum} &middot; patrickvdheide.nl/contact`,
     rows: [
       { key: "Naam",     val: escapeHtml(naam) },
-      { key: "E-mail",   val: `<a href="mailto:${escapeHtml(email)}" style="color:#fab3db;font-weight:600;">${escapeHtml(email)}</a>` },
+      { key: "E-mail",   val: `<a href="mailto:${escapeHtml(email)}" style="color:#fab3db;">${escapeHtml(email)}</a>` },
       { key: "Telefoon", val: escapeHtml(telefoon) },
       { key: "Bedrijf",  val: escapeHtml(bedrijf) },
       { key: "Bericht",  val: escapeHtml(bericht) },
@@ -573,7 +515,7 @@ function buildInternalOfferte({ naam, email, telefoon, bedrijf, bericht, pakket,
     meta: `${inkomstDatum} &middot; patrickvdheide.nl/offerte-aanvragen`,
     rows: [
       { key: "Naam",      val: escapeHtml(naam) },
-      { key: "E-mail",    val: `<a href="mailto:${escapeHtml(email)}" style="color:#fab3db;font-weight:600;">${escapeHtml(email)}</a>` },
+      { key: "E-mail",    val: `<a href="mailto:${escapeHtml(email)}" style="color:#fab3db;">${escapeHtml(email)}</a>` },
       { key: "Telefoon",  val: escapeHtml(telefoon) },
       { key: "Bedrijf",   val: escapeHtml(bedrijf) },
       { key: "Pakket",    val: `<span style="display:inline-block;background:#fab3db;color:#111111;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 12px;border-radius:100px;">${escapeHtml(pakket)}</span>` },
@@ -585,9 +527,9 @@ function buildInternalOfferte({ naam, email, telefoon, bedrijf, bericht, pakket,
 
 function buildInternalEmail({ badge, title, meta, rows }) {
   const rowsHtml = rows.map(r => `
-    <div style="display:flex;border-bottom:1px solid #cecece;align-items:flex-start;">
-      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#878787;background:#fafafa;padding:13px 14px;width:110px;flex-shrink:0;border-right:1px solid #cecece;line-height:1.4;">${r.key}</span>
-      <span style="font-size:14px;color:#111111;padding:13px 16px;flex:1;word-break:break-word;line-height:1.6;">${r.val}</span>
+    <div style="display:flex;border-bottom:1px solid #1e1e1e;align-items:flex-start;">
+      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#878787;padding:13px 16px;width:100px;flex-shrink:0;border-right:1px solid #1e1e1e;">${r.key}</span>
+      <span style="font-size:14px;color:#ffffff;padding:13px 16px;flex:1;word-break:break-word;line-height:1.6;">${r.val}</span>
     </div>`).join("");
 
   return `<!DOCTYPE html>
@@ -596,20 +538,15 @@ function buildInternalEmail({ badge, title, meta, rows }) {
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
-<body style="margin:0;padding:0;background:#fffff5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
-  <div style="max-width:560px;margin:32px auto;background:#ffffff;border:1px solid #cecece;overflow:hidden;">
-    <div style="background:#111111;padding:20px 28px;">
-      <div style="margin-bottom:10px;">
-        <span style="display:inline-block;background:#fab3db;color:#111111;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 12px;border-radius:100px;">${badge}</span>
-      </div>
-      <h2 style="font-family:Impact,'Arial Black',Arial,sans-serif;font-size:20px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#ffffff;margin:0 0 6px;">${title}</h2>
+<body style="margin:0;padding:0;background:#111111;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+  <div style="max-width:540px;margin:32px auto;background:#111111;border:1px solid #1e1e1e;overflow:hidden;">
+    <div style="padding:22px 28px;border-bottom:4px solid #fab3db;">
+      <span style="display:inline-block;background:#fab3db;color:#111111;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 12px;border-radius:100px;margin-bottom:12px;">${badge}</span>
+      <h2 style="font-family:Impact,'Arial Black',Arial,sans-serif;font-size:22px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#ffffff;margin:0 0 6px;">${title}</h2>
       <p style="font-size:11px;color:#878787;margin:0;">${meta}</p>
     </div>
-    <div style="border-top:4px solid #fab3db;">
-      ${rowsHtml}
-      <div style="height:1px;background:#ffffff;"></div>
-    </div>
-    <div style="padding:14px 28px;background:#fafafa;border-top:1px solid #cecece;text-align:center;">
+    <div>${rowsHtml}</div>
+    <div style="padding:14px 28px;border-top:1px solid #1e1e1e;text-align:center;">
       <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#878787;">patrickvdheide.nl &mdash; interne notificatie</span>
     </div>
   </div>
@@ -617,7 +554,6 @@ function buildInternalEmail({ badge, title, meta, rows }) {
 </html>`;
 }
 
-/* ── HTML-escaping ─────────────────────────────────────────────── */
 function escapeHtml(str) {
   return String(str ?? "—")
     .replace(/&/g, "&amp;")
