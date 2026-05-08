@@ -1,0 +1,15 @@
+# Cloudflare Pages config — alleen nodig voor lokaal testen met `wrangler pages dev`.
+# Productie-deploy via Git-integratie in Cloudflare Dashboard heeft dit niet nodig.
+
+name = "patrickvdheide-api"
+compatibility_date = "2025-05-01"
+pages_build_output_dir = "."
+
+# KV-bindings voor lokale dev. In productie worden deze ingesteld via Dashboard.
+# [[kv_namespaces]]
+# binding = "RATE_LIMIT_KV"
+# id = "VUL_HIER_JE_KV_ID_IN"
+#
+# [[kv_namespaces]]
+# binding = "FEEDBACK_KV"
+# id = "VUL_HIER_JE_KV_ID_IN"

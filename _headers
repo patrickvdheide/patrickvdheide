@@ -1,0 +1,10 @@
+# Cache embed.js voor 5 minuten in browser, ook in Cloudflare CDN.
+# Bij update: na 5 min auto-refresh, of forceer via dashboard purge cache.
+/embed.js
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=300, s-maxage=300
+  X-Content-Type-Options: nosniff
+
+# API responses nooit cachen
+/api/*
+  Cache-Control: no-store

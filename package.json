@@ -1,0 +1,17 @@
+{
+  "name": "patrickvdheide-api",
+  "version": "1.0.0",
+  "description": "Vraag het Patrick — AI Q&A widget API en embed-loader voor patrickvdheide.nl. Cloudflare Pages Function + Anthropic Claude.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev . --kv RATE_LIMIT_KV --kv FEEDBACK_KV",
+    "deploy": "wrangler pages deploy ."
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
